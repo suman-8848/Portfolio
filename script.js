@@ -107,6 +107,11 @@ skillBars.forEach(bar => {
     skillObserver.observe(bar);
 });
 
+// Initialize EmailJS
+(function() {
+    emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
+})();
+
 // Contact form handling
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
@@ -131,19 +136,32 @@ if (contactForm) {
             return;
         }
         
-        // Simulate form submission
+        // Update button state
         const submitButton = this.querySelector('button[type="submit"]');
         const originalText = submitButton.textContent;
         submitButton.textContent = 'Sending...';
         submitButton.disabled = true;
         
-        // Simulate API call
-        setTimeout(() => {
-            showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
-            this.reset();
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-        }, 2000);
+        // Send email using EmailJS
+        const templateParams = {
+            from_name: name,
+            from_email: email,
+            subject: subject,
+            message: message,
+            to_email: 'sumanlamsal246@gmail.com' // Your email address
+        };
+        
+        emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+            .then(function(response) {
+                showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
+                contactForm.reset();
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }, function(error) {
+                showNotification('Failed to send message. Please try again or email me directly.', 'error');
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            });
     });
 }
 
