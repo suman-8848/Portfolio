@@ -109,7 +109,10 @@ skillBars.forEach(bar => {
 
 // Initialize EmailJS
 (function() {
-    emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
+    // Check if EmailJS is properly configured
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
+    }
 })();
 
 // Contact form handling
@@ -142,26 +145,37 @@ if (contactForm) {
         submitButton.textContent = 'Sending...';
         submitButton.disabled = true;
         
-        // Send email using EmailJS
-        const templateParams = {
-            from_name: name,
-            from_email: email,
-            subject: subject,
-            message: message,
-            to_email: 'sumanlamsal246@gmail.com' // Your email address
-        };
-        
-        emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
-            .then(function(response) {
-                showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
-                contactForm.reset();
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-            }, function(error) {
-                showNotification('Failed to send message. Please try again or email me directly.', 'error');
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-            });
+        // Check if EmailJS is configured
+        if (typeof emailjs !== 'undefined' && emailjs.init) {
+            // Send email using EmailJS
+            const templateParams = {
+                from_name: name,
+                from_email: email,
+                subject: subject,
+                message: message,
+                to_email: 'sumanlamsal246@gmail.com' // Your email address
+            };
+            
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+                .then(function(response) {
+                    showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
+                    contactForm.reset();
+                    submitButton.textContent = originalText;
+                    submitButton.disabled = false;
+                }, function(error) {
+                    showNotification('Failed to send message. Please try again or email me directly.', 'error');
+                    submitButton.textContent = originalText;
+                    submitButton.disabled = false;
+                });
+        } else {
+            // Fallback: Open email client
+            const mailtoLink = `mailto:sumanlamsal246@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`)}`;
+            window.open(mailtoLink);
+            showNotification('Opening your email client. Please send the message manually.', 'info');
+            contactForm.reset();
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        }
     });
 }
 
